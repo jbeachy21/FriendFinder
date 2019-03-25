@@ -1,8 +1,7 @@
 var path = require("path");
-var friends = require("../app/data/friends");
-var newFriend = require("../click");
-// var click = require("../click");
-//var answers = require("../public/survey");
+var friends = require("../app/data/friends.js");
+
+
 
 module.exports = function(app) {
 
@@ -10,35 +9,43 @@ module.exports = function(app) {
 
 app.get("/api/friends", function(req, res) {
     
-
+    //res.json(friends);
     res.sendFile(path.join(__dirname, "../app/data/friends.js"));
     
   
   });
 
   app.post("/api/friends", function(req, res) {
-    var NEWFRIEND = JSON.stringify(click.newFriend);
-    
-    var difference = [];
+    console.log(req.body);
+    //req.body.scores for newFriend scores
+    var difference;
     var TotalDifference = [];
-    for (var i = 0; i<friends.friends.length; i++) {
+    console.log("friends: " + JSON.stringify(friends));
+    
+    for (var i = 0; i<friends.length; i++) {
+      difference = 0;
         for (var j = 0; j<10; j++) {
             //compares the scores of friends.js to what you just got in the survey
-            difference[j] = friends.friends[friends.friends.length - 1] - friends.friends[i].scores[j];
+            difference =  difference + (req.body.scores[j] - friends[i].scores[j]);
+            console.log("difference[j]: " + difference[j])
         }
         //Gets difference of array and takes absolute value of it
-        TotalDifference[i] = Math.abs(difference.reduce());
-        console.log("TotalDifference[i]: " + TotalDifference[i]);
+        TotalDifference[i] = Math.abs(difference);
+        console.log("TotalDifference[" + i + "]: " + TotalDifference[i]);
     }
     var index;
     for (var i = 0; i<TotalDifference.length; i++) {
       if (TotalDifference[i] < TotalDifference[i+1]) {
-        index = TotalDifference[i];
+        index = i;
+        console.log("index = " + index);
       }
     }
-    document.getElementById("friend").innerHTML = friends.friends[index].name;
-    document.getElementById("photoFrame").innerHTML = friends.friends[index].photo;
-
+    var bestFriend = {
+      name: friends[index].name,
+      photo: friends[index].photo,
+      scores: friends[index].scores,
+    }
+    res.json(bestFriend);
   })
 
 }
